@@ -1,0 +1,16 @@
+PODS:
+  - DTBonjour (1.1.0)
+  - JSMessagesViewController (3.4.4):
+    - JSQSystemSoundPlayer
+  - JSQSystemSoundPlayer (1.4.0)
+
+DEPENDENCIES:
+  - DTBonjour
+  - JSMessagesViewController
+
+SPEC CHECKSUMS:
+  DTBonjour: 476d06d1977aac8ec6b40fabb453bdcafa546ead
+  JSMessagesViewController: 309de7324fbf48b7da924b002ef6017d5d2ce026
+  JSQSystemSoundPlayer: 28ccd01a92a0cebc6de6361e8499011b4cb6dab7
+
+COCOAPODS: 0.29.0
