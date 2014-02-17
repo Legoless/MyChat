@@ -6,8 +6,10 @@
 //  Copyright (c) 2014 arvystate.net. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <JSMessagesViewController/JSMessagesViewController.h>
 
-@interface RoomVC : UIViewController
+@interface RoomVC : JSMessagesViewController
+
+@property (nonatomic, strong) id room;
 
 @end

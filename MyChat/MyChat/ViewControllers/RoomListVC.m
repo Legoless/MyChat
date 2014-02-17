@@ -9,6 +9,7 @@
 #import "Room.h"
 
 #import "RoomListVC.h"
+#import "RoomVC.h"
 
 @interface RoomListVC () <UIAlertViewDelegate, NSNetServiceBrowserDelegate, NSNetServiceDelegate>
 
@@ -168,6 +169,23 @@
 	[room start];
     
 	[self.tableView reloadData];
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"RoomSegue"])
+    {
+        NSIndexPath* indexPath = [self.tableView indexPathForCell:sender];
+        
+        if (indexPath.section == 0)
+        {
+            [segue.destinationViewController setRoom:self.rooms[indexPath.row]];
+        }
+        else if (indexPath.section == 1)
+        {
+            [segue.destinationViewController setRoom:self.services[indexPath.row]];
+        }
+    }
 }
 
 #pragma mark - UITableView Delegate / Datasource
