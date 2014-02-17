@@ -6,115 +6,221 @@
 //  Copyright (c) 2014 arvystate.net. All rights reserved.
 //
 
+#import "Room.h"
+
 #import "RoomListVC.h"
 
-@interface RoomListVC ()
+@interface RoomListVC () <UIAlertViewDelegate, NSNetServiceBrowserDelegate, NSNetServiceDelegate>
+
+@property (nonatomic, strong) NSMutableArray* services;
+@property (nonatomic, strong) NSMutableArray* rooms;
+@property (nonatomic, strong) NSMutableArray* otherServices;
+
+@property (nonatomic, strong) NSNetServiceBrowser* browser;
 
 @end
 
 @implementation RoomListVC
 
-- (id)initWithStyle:(UITableViewStyle)style
+- (NSMutableArray *)services
 {
-    self = [super initWithStyle:style];
-    if (self) {
-        // Custom initialization
+    if (!_services)
+    {
+        _services = [NSMutableArray array];
     }
-    return self;
+    
+    return _services;
+}
+
+- (NSMutableArray *)rooms
+{
+    if (!_rooms)
+    {
+        _rooms = [NSMutableArray array];
+    }
+    
+    return _rooms;
+}
+
+- (NSMutableArray *)otherServices
+{
+    if (!_otherServices)
+    {
+        _otherServices = [NSMutableArray array];
+    }
+    
+    return _otherServices;
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+	self.browser = [[NSNetServiceBrowser alloc] init];
+	self.browser.delegate = self;
+	[self.browser searchForServicesOfType:@"_MyChat._tcp." inDomain:@""];
 }
 
-- (void)didReceiveMemoryWarning
+#pragma mark - NetServiceBrowser Delegate
+- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser didFindService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
 {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+	aNetService.delegate = self;
+	[aNetService startMonitoring];
+    
+	[self.otherServices addObject:aNetService];
+    
+	NSLog(@"found: %@", aNetService);
+    
+	if (!moreComing)
+	{
+		[self updateServices];
+	}
 }
 
-#pragma mark - Table view data source
+- (void)netServiceBrowser:(NSNetServiceBrowser *)aNetServiceBrowser
+         didRemoveService:(NSNetService *)aNetService moreComing:(BOOL)moreComing
+{
+	[self.rooms removeObject:aNetService];
+	[self.otherServices removeObject:aNetService];
+    
+	NSLog(@"removed: %@", aNetService);
+    
+	if (!moreComing)
+	{
+		[self.tableView reloadData];
+	}
+}
+
+#pragma mark - NSNetService Delegate
+- (void)netService:(NSNetService *)sender didUpdateTXTRecordData:(NSData *)data
+{
+	[self updateServices];
+    
+	[sender stopMonitoring];
+}
+
+- (BOOL)isLocalServiceIdentifier:(NSString *)identifier
+{
+	for (Room *room in self.rooms)
+	{
+		if ([room.identifier isEqualToString:identifier])
+		{
+			return YES;
+		}
+	}
+    
+	return NO;
+}
+
+- (void)updateServices
+{
+	BOOL didUpdate = NO;
+    
+	for (NSNetService *service in [self.otherServices copy])
+	{
+		NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:service.TXTRecordData];
+        
+		if (!dict)
+		{
+			continue;
+		}
+        
+		NSString *identifier = [[NSString alloc] initWithData:dict[@"ID"] encoding:NSUTF8StringEncoding];
+        
+		if (![self isLocalServiceIdentifier:identifier])
+		{
+			[self.services addObject:service];
+			didUpdate = YES;
+		}
+        
+		[self.otherServices removeObject:service];
+	}
+    
+	if (didUpdate)
+	{
+		[self.tableView reloadData];
+	}
+}
+
+- (IBAction)newRoomButtonTap:(UIBarButtonItem *)sender
+{
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Room name" message:@"Enter room name:" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ok", nil];
+    alertView.alertViewStyle = UIAlertViewStylePlainTextInput;
+    
+    [alertView show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    //
+    // Block cancel
+    //
+    
+    if (buttonIndex == 0)
+    {
+        return;
+    }
+    
+    UITextField* roomName = [alertView textFieldAtIndex:0];
+    
+    Room *room = [[Room alloc] initWithRoomName:roomName.text];
+	[self.rooms addObject:room];
+	[room start];
+    
+	[self.tableView reloadData];
+}
+
+#pragma mark - UITableView Delegate / Datasource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-#warning Potentially incomplete method implementation.
-    // Return the number of sections.
-    return 0;
+	return 2;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+	if (section == 0)
+	{
+		return @"My rooms";
+	}
+    
+	return @"Other rooms";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
-    return 0;
+	if (section == 0)
+	{
+		return [self.rooms count];
+	}
+    
+	return [self.services count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RoomCell"];
     
-    // Configure the cell...
+	if (indexPath.section == 0)
+	{
+		Room *room = self.rooms[indexPath.row];
+		cell.textLabel.text = room.name;
+		cell.detailTextLabel.text = nil;
+	}
+	else
+	{
+		NSNetService *service = self.services[indexPath.row];
+
+		NSDictionary *dict = [NSNetService dictionaryFromTXTRecordData:service.TXTRecordData];
+        
+        NSLog(@"TXT: %@", service);
+        
+		NSString *roomName = [[NSString alloc] initWithData:dict[@"RoomName"] encoding:NSUTF8StringEncoding];
+		cell.textLabel.text = roomName;
+		cell.detailTextLabel.text = [service name];
+	}
     
-    return cell;
+	return cell;
 }
-
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
-}
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a story board-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-
- */
 
 @end

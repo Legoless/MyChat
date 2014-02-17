@@ -4,21 +4,37 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3747"/>
     </dependencies>
     <scenes>
-        <!--Table View Controller-->
+        <!--Room ListVC - Chat-->
         <scene sceneID="f2o-M8-6r0">
             <objects>
-                <tableViewController id="ner-0n-Csv" sceneMemberID="viewController">
+                <tableViewController id="ner-0n-Csv" customClass="RoomListVC" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="60" sectionHeaderHeight="22" sectionFooterHeight="22" id="4Z2-hV-H8p">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="60" id="xVm-ML-Kle">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="RoomCell" textLabel="usB-Bs-xT7" detailTextLabel="grk-Rm-O1m" rowHeight="60" style="IBUITableViewCellStyleValue1" id="xVm-ML-Kle">
                                 <rect key="frame" x="0.0" y="86" width="320" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="xVm-ML-Kle" id="njg-gP-Z7u">
                                     <rect key="frame" x="0.0" y="0.0" width="320" height="59"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="usB-Bs-xT7">
+                                            <rect key="frame" x="15" y="19" width="33" height="21"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Detail" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="grk-Rm-O1m">
+                                            <rect key="frame" x="261" y="19" width="44" height="21"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
                                 </tableViewCellContentView>
                             </tableViewCell>
                         </prototypes>
@@ -27,8 +43,12 @@
                             <outlet property="delegate" destination="ner-0n-Csv" id="9Bw-GC-jXl"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="JTZ-dM-3Y9">
-                        <barButtonItem key="rightBarButtonItem" title="New" id="IsO-fT-qHl"/>
+                    <navigationItem key="navigationItem" title="Chat" id="JTZ-dM-3Y9">
+                        <barButtonItem key="rightBarButtonItem" title="New" id="IsO-fT-qHl">
+                            <connections>
+                                <action selector="newRoomButtonTap:" destination="ner-0n-Csv" id="q76-hV-SCd"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <segue destination="9TN-BA-sX8" kind="push" identifier="RoomSegue" id="Dvy-In-Sla"/>
@@ -38,10 +58,10 @@
             </objects>
             <point key="canvasLocation" x="1264" y="223"/>
         </scene>
-        <!--View Controller-->
+        <!--RoomVC-->
         <scene sceneID="TFO-de-WHd">
             <objects>
-                <viewController id="9TN-BA-sX8" sceneMemberID="viewController">
+                <viewController id="9TN-BA-sX8" customClass="RoomVC" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="k7J-8T-vIj"/>
                         <viewControllerLayoutGuide type="bottom" id="SCp-LI-Poz"/>
