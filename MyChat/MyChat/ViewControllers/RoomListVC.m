@@ -143,6 +143,11 @@
 	}
 }
 
+- (void)netService:(NSNetService *)sender didAcceptConnectionWithInputStream:(NSInputStream *)inputStream outputStream:(NSOutputStream *)outputStream
+{
+    
+}
+
 - (IBAction)newRoomButtonTap:(UIBarButtonItem *)sender
 {
     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Room name" message:@"Enter room name:" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ok", nil];
