@@ -20,5 +20,5 @@ Todo list
 
 Libraries
 =====
-- **DTBonjour** - Handles Bonjour communication and auto-discovery of chat rooms.
-- **JSMessagesViewController** - Handles displaying of messages and conversations received by Bonjour.
+- **[DTBonjour](https://github.com/Cocoanetics/DTBonjour)** - Handles Bonjour communication and auto-discovery of chat rooms.
+- **[JSMessagesViewController](https://github.com/jessesquires/MessagesTableViewController)** - Handles displaying of messages and conversations received by Bonjour.
