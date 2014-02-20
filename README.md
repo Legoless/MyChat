@@ -17,6 +17,7 @@ View Controllers
 Todo list
 =====
 - Typing notification
+- Permanent storage of messages
 
 Libraries
 =====
